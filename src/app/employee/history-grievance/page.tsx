@@ -1,3 +1,8 @@
+"use client";
+
+import { getClientInfo } from "@/app/admin/chat/actions";
+import { useEffect, useState } from "react";
+
 interface Grievance {
 	id: String;
 	user_id: String;
@@ -14,170 +19,22 @@ interface Grievance {
 	resolved_at: string;
 }
 
-const grievances: Grievance[] = [
-	{
-		id: 'G001',
-		user_id: 'U123',
-		grievance_type: 'Workplace Harassment',
-		title: 'Verbal Abuse from Supervisor',
-		description:
-			'Experiencing repeated verbal abuse from immediate supervisor during team meetings.',
-		assigned_to: 'HR001',
-		assigned_type: 'HR',
-		dep_id: 'D001',
-		severity: 'High',
-		status: 'Pending',
-		created_at: '2024-06-15T09:30:00Z',
-		updated_at: '2024-06-15T14:45:00Z',
-		resolved_at: '',
-	},
-	{
-		id: 'G002',
-		user_id: 'U456',
-		grievance_type: 'Compensation',
-		title: 'Unpaid Overtime',
-		description:
-			'Not receiving compensation for overtime hours worked in the last month.',
-		assigned_to: null,
-		assigned_type: 'HR',
-		dep_id: 'D002',
-		severity: 'Medium',
-		status: 'Submitted',
-		created_at: '2024-06-18T11:20:00Z',
-		updated_at: '2024-06-18T11:20:00Z',
-		resolved_at: '',
-	},
-	{
-		id: 'G003',
-		user_id: 'U789',
-		grievance_type: 'Work Environment',
-		title: 'Inadequate Safety Measures',
-		description:
-			'Lack of proper safety equipment in the manufacturing department.',
-		assigned_to: 'D003M',
-		assigned_type: 'Department',
-		dep_id: 'D003',
-		severity: 'High',
-		status: 'Pending',
-		created_at: '2024-06-20T13:45:00Z',
-		updated_at: '2024-06-21T10:30:00Z',
-		resolved_at: '',
-	},
-	{
-		id: 'G004',
-		user_id: 'U234',
-		grievance_type: 'Discrimination',
-		title: 'Age Discrimination in Promotion',
-		description:
-			'Passed over for promotion due to age, despite meeting all qualifications.',
-		assigned_to: 'HR002',
-		assigned_type: 'HR',
-		dep_id: 'D004',
-		severity: 'High',
-		status: 'Pending',
-		created_at: '2024-06-22T16:00:00Z',
-		updated_at: '2024-06-23T09:15:00Z',
-		resolved_at: '',
-	},
-	{
-		id: 'G005',
-		user_id: 'U567',
-		grievance_type: 'Work-Life Balance',
-		title: 'Excessive Workload',
-		description:
-			'Consistently assigned more tasks than can be completed within regular working hours.',
-		assigned_to: 'D005M',
-		assigned_type: 'Department',
-		dep_id: 'D005',
-		severity: 'Medium',
-		status: 'Resolved',
-		created_at: '2024-06-25T10:30:00Z',
-		updated_at: '2024-06-28T14:20:00Z',
-		resolved_at: '2024-06-28T14:20:00Z',
-	},
-	{
-		id: 'G006',
-		user_id: 'U890',
-		grievance_type: 'Benefits',
-		title: 'Health Insurance Coverage Issue',
-		description:
-			'Recent medical claim wrongly denied by company health insurance.',
-		assigned_to: 'HR003',
-		assigned_type: 'HR',
-		dep_id: 'D006',
-		severity: 'Medium',
-		status: 'Pending',
-		created_at: '2024-06-26T09:00:00Z',
-		updated_at: '2024-06-26T15:45:00Z',
-		resolved_at: '',
-	},
-	{
-		id: 'G007',
-		user_id: 'U345',
-		grievance_type: 'Communication',
-		title: 'Lack of Transparency in Decision Making',
-		description:
-			'Important departmental decisions being made without consulting team members.',
-		assigned_to: 'D007M',
-		assigned_type: 'Department',
-		dep_id: 'D007',
-		severity: 'Low',
-		status: 'Submitted',
-		created_at: '2024-06-27T11:30:00Z',
-		updated_at: '2024-06-27T11:30:00Z',
-		resolved_at: '',
-	},
-	{
-		id: 'G008',
-		user_id: 'U678',
-		grievance_type: 'Performance Evaluation',
-		title: 'Unfair Performance Review',
-		description:
-			'Recent performance review does not accurately reflect achievements and contributions.',
-		assigned_to: 'HR001',
-		assigned_type: 'HR',
-		dep_id: 'D008',
-		severity: 'Medium',
-		status: 'Pending',
-		created_at: '2024-06-28T14:15:00Z',
-		updated_at: '2024-06-29T10:00:00Z',
-		resolved_at: '',
-	},
-	{
-		id: 'G009',
-		user_id: 'U901',
-		grievance_type: 'Equipment',
-		title: 'Outdated Software Hindering Productivity',
-		description:
-			'Current software version is obsolete and significantly slowing down work processes.',
-		assigned_to: 'D009M',
-		assigned_type: 'Department',
-		dep_id: 'D009',
-		severity: 'Low',
-		status: 'Resolved',
-		created_at: '2024-06-29T09:45:00Z',
-		updated_at: '2024-06-29T16:30:00Z',
-		resolved_at: '2024-06-29T16:30:00Z',
-	},
-	{
-		id: 'G010',
-		user_id: 'U432',
-		grievance_type: 'Workplace Conflict',
-		title: 'Ongoing Dispute with Coworker',
-		description:
-			'Unresolved conflict with team member affecting productivity and team morale.',
-		assigned_to: null,
-		assigned_type: 'HR',
-		dep_id: 'D010',
-		severity: 'Medium',
-		status: 'Submitted',
-		created_at: '2024-06-29T13:00:00Z',
-		updated_at: '2024-06-29T13:00:00Z',
-		resolved_at: '',
-	},
-];
 
 const GrievanceHistoryPage = () => {
+	const [ grievances, setGrievances ] = useState<Grievance[]>([]);
+	
+	const fetchGrievances = async () => {
+		const user = await getClientInfo();
+		const response = await fetch('/get_grievance_details/' + user.id);
+		const data = await response.json();
+		setGrievances(data.grievances);
+		console.log(data);
+	}
+	useEffect(() => {
+		(async () => {
+			await fetchGrievances();
+		 })();
+	},[])
 	return (
 		<div className="container mx-auto px-4 sm:px-6 lg:px-8 py-8  ">
 			<div className="">

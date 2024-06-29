@@ -17,41 +17,51 @@ export default async function Home(params: {
         <Searchbar />
         <Invite/>
       </div>
-      <div className="mt-4">
-        <table className="w-full">
-          <thead>
+      <div className="relative overflow-x-auto">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th className="">Name</th> 
-              <th>Email</th>
-              <th>Role</th>
+              <th scope="col" className="px-6 py-3">Name</th>
+              <th scope="col" className="px-6 py-3">Email</th>
+              <th scope="col" className="px-6 py-3">Role</th>
             </tr>
           </thead>
           <tbody>
             {users.data.map(user => (
-              <tr key={user.id}>
-                <td className="text-center">{user.fullName}</td>
-                <td className="text-center">{user.emailAddresses[0].emailAddress}</td>
-                <td className="text-center">{(user.publicMetadata as any).role}</td>
+              <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" key={user.id}>
+                <td  className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{user.fullName}</td>
+                <td  className="px-6 py-4">{user.emailAddresses[0].emailAddress}</td>
+                <td  className="px-6 py-4">{(user.publicMetadata as any).role}</td>
               </tr>
             ))}
           </tbody>
         </table>
-        <table className="w-full">
-          <thead>
+        <h3 className="mt-8 mb-4 text-lg font-semibold text-gray-900 dark:text-black">
+          Pending Invitations
+        </h3>
+        <div className="relative overflow-x-auto">
+        <table className="w-full text-sm text-left rtl:text-right text-gray-500 dark:text-gray-400">
+          <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
             <tr>
-              <th className="">Email</th> 
-              <th>Role</th>
+              <th scope="col"className="px-6 py-3">Email</th> 
+                <th scope="col" className="px-6 py-3">Role</th>
+                <th scope="col" className="px-6 py-3">Actions</th>
             </tr>
           </thead>
           <tbody>
             {pendingInvitations.data.map(invitation => (
-              <tr key={invitation.id}>
-                <td className="text-center">{invitation.emailAddress}</td>
-                <td className="text-center">{(invitation.publicMetadata as any).role}</td>
+              <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" key={invitation.id}>
+                <td className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">{invitation.emailAddress}</td>
+                <td className="px-6 py-4">{(invitation.publicMetadata as any).role}</td>
+                <td className="px-6 py-4">
+                  <button className="text-blue-600 hover:underline mr-5" >Resend</button>
+                  <button className="text-red-600 hover:underline" >Delete</button>
+                </td>
               </tr>
             ))}
           </tbody>
-        </table>
+          </table>
+          </div>
       </div>
 		</main>
 	);

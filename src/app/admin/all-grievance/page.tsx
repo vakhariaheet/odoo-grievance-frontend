@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+
 interface Grievance {
 	id: String;
 	user_id: String;
@@ -177,7 +181,20 @@ const grievances: Grievance[] = [
 	},
 ];
 
+
 const GrievanceHistoryPage = () => {
+
+	const [ grievances, setGrievances ] = useState<Grievance[]>([]);
+	
+	useEffect(() => {
+		(async () => {
+			const response = await fetch(process.env.NEXT_PUBLIC_REST_API_URL + 'get_all_grievances');
+			const data = await response.json();
+			console.log(data.grievances);
+			setGrievances(data.grievances);
+		 })();
+	}, []);
+
 	return (
 		<div className='container mx-auto px-4 sm:px-6 lg:px-8 py-8  '>
 			<div className=''>

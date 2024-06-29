@@ -1,24 +1,52 @@
-import { clerkClient, currentUser } from "@clerk/nextjs/server";
+import { auth, clerkClient, currentUser } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 
 const AddGrievancePage = () => {
+	const handleSubmit = async (formData: FormData) => {
+		'use server';
+		const { sessionId } = auth();
+		if (!sessionId) return;
+		const files = formData.getAll('files');
+		console.log('files', files);
+		const attachments: string[] = [];
+		const token = await clerkClient.sessions.getToken(sessionId, 'jwt_token');
+		for (const file of files as File[]) {
+			console.log('file', file);
+			const fileData = new FormData();
+			fileData.append('file', file as Blob);
+			fileData.append('user_id', (await currentUser())?.id as string);
+			const fileResponse = await fetch(process.env.NEXT_PUBLIC_REST_API_URL + 'upload', {
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${token.jwt}`,
+				},
+				body: fileData,
+			});
+			const fileJson = await fileResponse.json();
+			attachments.push(fileJson.url);
+		}
 
-	const handleSubmit = async (formData:FormData) => { 
-		"use server"
 		const data = {
 			grievance_type: formData.get('grievance_type') as string,
 			title: formData.get('subject') as string,
 			description: formData.get('message') as string,
-			user_id: (await currentUser())?.id
+			user_id: (await currentUser())?.id,
+			attachments: attachments,
 		};
-		const response = await fetch('http://192.168.1.13:8000/grievance', {
+		console.log('data', data);
+		const response = await fetch(process.env.NEXT_PUBLIC_REST_API_URL + 'grievance', {
 			method: 'POST',
 			headers: {
 				'Content-Type': 'application/json',
+				Authorization: `Bearer ${token.jwt}`,
 			},
 			body: JSON.stringify(data),
 		});
+		redirect('/employee/history-grievance');
+
 		console.log('response', response);
 	};
+
 	return (
 		<div className='min-h-screen flex items-center justify-center bg-gray-100 dark:bg-gray-800'>
 			<form className=' mx-auto' action={handleSubmit}>
@@ -31,7 +59,7 @@ const AddGrievancePage = () => {
 					</label>
 					<select
 						id='grievance_type'
-						name="grievance_type"
+						name='grievance_type'
 						className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
 					>
 						<option value=''>Select a type</option>
@@ -42,7 +70,7 @@ const AddGrievancePage = () => {
 						<option value='other'>Other</option>
 					</select>
 				</div>
-				
+
 				<div className='relative z-0 w-full mb-5 group'>
 					<label
 						htmlFor='subject'
@@ -53,7 +81,7 @@ const AddGrievancePage = () => {
 					<input
 						id='subject'
 						type='text'
-						name="subject"
+						name='subject'
 						className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
 						required
 					/>
@@ -61,14 +89,13 @@ const AddGrievancePage = () => {
 				<div className='relative z-0 w-full mb-5 group'>
 					<label
 						htmlFor='message'
-						
 						className='block mb-2 text-sm font-medium text-gray-900 dark:text-white'
 					>
 						Description
 					</label>
 					<textarea
 						id='message'
-						name="message"
+						name='message'
 						className='bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500'
 						rows={5}
 						required
@@ -84,8 +111,9 @@ const AddGrievancePage = () => {
 					<input
 						className='block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400'
 						id='grievance_type'
-                        type='file'
-                        multiple
+						type='file'
+						name='files'
+						multiple
 					/>
 				</div>
 				<button
